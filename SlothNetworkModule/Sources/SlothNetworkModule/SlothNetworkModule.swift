@@ -1,3 +1,4 @@
-struct SlothNetworkModule {
-    var text = "Hello, World!"
+public struct SlothNetworkModule {
+    
+    public static let test = "hi"
 }

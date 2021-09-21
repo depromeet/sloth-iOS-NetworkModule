@@ -13,9 +13,10 @@ let package = Package(
     targets: [
         .target(
             name: "SlothNetworkModule",
-            dependencies: []),
+            path: "SlothNetworkModule/Sources"),
         .testTarget(
             name: "SlothNetworkModuleTests",
-            dependencies: ["SlothNetworkModule"]),
+            dependencies: ["SlothNetworkModule"],
+            path: "SlothNetworkModule/Tests")
     ]
 )
