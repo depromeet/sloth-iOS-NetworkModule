@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "SlothNetworkModule",
+    platforms: [.iOS(.v14)],
     products: [
         .library(
             name: "SlothNetworkModule",
