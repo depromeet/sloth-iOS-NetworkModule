@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import Combine
 
 public protocol NetworkManageable {
     
-    func dataTaskPublisher(for request: URLRequest) -> URLSession.DataTaskPublisher
+    func dataTaskPublisher(for request: URLRequest) -> AnyPublisher<Data, NetworkError>
 }
