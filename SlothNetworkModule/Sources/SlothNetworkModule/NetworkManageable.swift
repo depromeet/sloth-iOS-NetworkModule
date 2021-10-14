@@ -8,7 +8,9 @@
 import Foundation
 import Combine
 
+public typealias HTTPHeaders = [String: String]?
+
 public protocol NetworkManageable {
     
-    func dataTaskPublisher(for urlString: String, httpMethod: HTTPMethod) -> AnyPublisher<Data, NetworkError>
+    func dataTaskPublisher(for urlString: String, httpMethod: HTTPMethod, httpHeaders: HTTPHeaders) -> AnyPublisher<Data, NetworkError>
 }

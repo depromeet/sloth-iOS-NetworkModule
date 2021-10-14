@@ -17,7 +17,6 @@ public enum NetworkError: Error {
     case unknownError(error: Error)
 }
 
-
 public struct NetworkManager: NetworkManageable {
     
     private let session: URLSession
@@ -26,8 +25,8 @@ public struct NetworkManager: NetworkManageable {
         self.session = session
     }
     
-    public func dataTaskPublisher(for urlString: String, httpMethod: HTTPMethod) -> AnyPublisher<Data, NetworkError> {
-        guard let request = makeURLRequest(with: urlString, httpMethod: httpMethod) else {
+    public func dataTaskPublisher(for urlString: String, httpMethod: HTTPMethod, httpHeaders: HTTPHeaders) -> AnyPublisher<Data, NetworkError> {
+        guard let request = makeURLRequest(with: urlString, httpMethod: httpMethod, httpHeaders: httpHeaders) else {
             return Fail(error: NetworkError.invalidURL).eraseToAnyPublisher()
         }
         
@@ -57,7 +56,7 @@ public struct NetworkManager: NetworkManageable {
             .eraseToAnyPublisher()
     }
     
-    private func makeURLRequest(with urlString: String, httpMethod: HTTPMethod) -> URLRequest? {
+    private func makeURLRequest(with urlString: String, httpMethod: HTTPMethod, httpHeaders: HTTPHeaders) -> URLRequest? {
         guard let url = URL(string: urlString) else {
             return nil
         }
@@ -65,6 +64,10 @@ public struct NetworkManager: NetworkManageable {
         var request = URLRequest(url: url)
         
         request.httpMethod = "\(httpMethod)"
+        
+        httpHeaders?.forEach { key, value in
+            request.setValue(value, forHTTPHeaderField: key)
+        }
         
         return request
     }
