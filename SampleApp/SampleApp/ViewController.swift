@@ -50,7 +50,7 @@ public class UseCase {
     public func retrieve() -> AnyPublisher<Dummy, UseCaseError> {
         let url = URL(string: "http://13.124.140.7/api/health")!
         
-        return networkManager.dataTaskPublisher(for: URLRequest(url: url))
+        return networkManager.dataTaskPublisher(for: URLRequest(url: url), httpMethod: .get)
             .decode(type: Dummy.self, decoder: JSONDecoder())
             .mapError { error -> UseCaseError in
                 if error is DecodingError {

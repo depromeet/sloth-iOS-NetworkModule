@@ -10,6 +10,7 @@ import Combine
 
 public enum NetworkError: Error {
     
+    case invalidURL
     case invalidHttpResponse
     case invalidStatusCode(statusCode: Int)
     case emptyData
@@ -25,7 +26,11 @@ public struct NetworkManager: NetworkManageable {
         self.session = session
     }
     
-    public func dataTaskPublisher(for request: URLRequest) -> AnyPublisher<Data, NetworkError> {
+    public func dataTaskPublisher(for urlString: String, httpMethod: HTTPMethod) -> AnyPublisher<Data, NetworkError> {
+        guard let request = makeURLRequest(with: urlString, httpMethod: httpMethod) else {
+            return Fail(error: NetworkError.invalidURL).eraseToAnyPublisher()
+        }
+        
         return session.dataTaskPublisher(for: request)
             .tryMap { data, response in
                 guard let httpResponse = response as? HTTPURLResponse else {
@@ -50,5 +55,17 @@ public struct NetworkManager: NetworkManageable {
                 }
             }
             .eraseToAnyPublisher()
+    }
+    
+    private func makeURLRequest(with urlString: String, httpMethod: HTTPMethod) -> URLRequest? {
+        guard let url = URL(string: urlString) else {
+            return nil
+        }
+        
+        var request = URLRequest(url: url)
+        
+        request.httpMethod = "\(httpMethod)"
+        
+        return request
     }
 }

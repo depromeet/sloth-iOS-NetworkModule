@@ -10,5 +10,5 @@ import Combine
 
 public protocol NetworkManageable {
     
-    func dataTaskPublisher(for request: URLRequest) -> AnyPublisher<Data, NetworkError>
+    func dataTaskPublisher(for urlString: String, httpMethod: HTTPMethod) -> AnyPublisher<Data, NetworkError>
 }
