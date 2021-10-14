@@ -10,7 +10,7 @@ import Foundation
 public enum HTTPMethod: CustomStringConvertible {
     
     case get
-    case post
+    case post(body: Encodable)
     
     public var description: String {
         switch self {
