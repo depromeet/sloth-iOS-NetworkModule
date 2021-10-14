@@ -11,6 +11,7 @@ import Combine
 public enum NetworkError: Error {
     
     case invalidURL
+    case invalidBody
     case invalidHttpResponse
     case invalidStatusCode(statusCode: Int)
     case emptyData
@@ -26,8 +27,16 @@ public struct NetworkManager: NetworkManageable {
     }
     
     public func dataTaskPublisher(for urlString: String, httpMethod: HTTPMethod, httpHeaders: HTTPHeaders) -> AnyPublisher<Data, NetworkError> {
-        guard let request = makeURLRequest(with: urlString, httpMethod: httpMethod, httpHeaders: httpHeaders) else {
-            return Fail(error: NetworkError.invalidURL).eraseToAnyPublisher()
+        let request: URLRequest
+        
+        do {
+            request = try makeURLRequest(with: urlString, httpMethod: httpMethod, httpHeaders: httpHeaders)
+        } catch {
+            if let error = error as? NetworkError {
+                return Fail(error: error).eraseToAnyPublisher()
+            } else {
+                return Fail(error: .unknownError(error: error)).eraseToAnyPublisher()
+            }
         }
         
         return session.dataTaskPublisher(for: request)
@@ -56,18 +65,21 @@ public struct NetworkManager: NetworkManageable {
             .eraseToAnyPublisher()
     }
     
-    private func makeURLRequest(with urlString: String, httpMethod: HTTPMethod, httpHeaders: HTTPHeaders) -> URLRequest? {
+    private func makeURLRequest(with urlString: String, httpMethod: HTTPMethod, httpHeaders: HTTPHeaders) throws -> URLRequest {
         guard let url = URL(string: urlString) else {
-            return nil
+            throw NetworkError.invalidURL
         }
         
         var request = URLRequest(url: url)
         
         request.httpMethod = "\(httpMethod)"
-        
-        httpHeaders?.forEach { key, value in
-            request.setValue(value, forHTTPHeaderField: key)
+        do {
+            try request.addBody(with: httpMethod)
+        } catch {
+            throw NetworkError.invalidBody
         }
+        
+        request.allHTTPHeaderFields = httpHeaders
         
         return request
     }
