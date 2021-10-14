@@ -14,10 +14,6 @@ let package = Package(
     targets: [
         .target(
             name: "SlothNetworkModule",
-            path: "SlothNetworkModule/Sources"),
-        .testTarget(
-            name: "SlothNetworkModuleTests",
-            dependencies: ["SlothNetworkModule"],
-            path: "SlothNetworkModule/Tests")
+            path: "SlothNetworkModule/Sources")
     ]
 )
