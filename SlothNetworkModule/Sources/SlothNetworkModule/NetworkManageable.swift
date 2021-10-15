@@ -13,4 +13,5 @@ public typealias HTTPHeaders = [String: String]?
 public protocol NetworkManageable {
     
     func dataTaskPublisher(for urlString: String, httpMethod: HTTPMethod, httpHeaders: HTTPHeaders) -> AnyPublisher<Data, NetworkError>
+    func dataTaskPublisher(for url: URL?, httpMethod: HTTPMethod, httpHeaders: HTTPHeaders) -> AnyPublisher<Data, NetworkError>
 }

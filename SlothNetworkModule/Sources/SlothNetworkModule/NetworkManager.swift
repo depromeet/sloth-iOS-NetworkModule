@@ -26,6 +26,22 @@ public struct NetworkManager: NetworkManageable {
         self.session = session
     }
     
+    public func dataTaskPublisher(for url: URL?, httpMethod: HTTPMethod, httpHeaders: HTTPHeaders) -> AnyPublisher<Data, NetworkError> {
+        let request: URLRequest
+        
+        do {
+            request = try makeURLRequest(with: url, httpMethod: httpMethod, httpHeaders: httpHeaders)
+        } catch {
+            if let error = error as? NetworkError {
+                return Fail(error: error).eraseToAnyPublisher()
+            } else {
+                return Fail(error: .unknownError(error: error)).eraseToAnyPublisher()
+            }
+        }
+        
+        return processingNetworkResponse(with: request)
+    }
+    
     public func dataTaskPublisher(for urlString: String, httpMethod: HTTPMethod, httpHeaders: HTTPHeaders) -> AnyPublisher<Data, NetworkError> {
         let request: URLRequest
         
@@ -39,6 +55,48 @@ public struct NetworkManager: NetworkManageable {
             }
         }
         
+        return processingNetworkResponse(with: request)
+    }
+    
+    private func makeURLRequest(with urlString: String, httpMethod: HTTPMethod, httpHeaders: HTTPHeaders) throws -> URLRequest {
+        guard let url = URL(string: urlString) else {
+            throw NetworkError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        
+        request.httpMethod = "\(httpMethod)"
+        do {
+            try request.addBody(with: httpMethod)
+        } catch {
+            throw NetworkError.invalidBody
+        }
+        
+        request.allHTTPHeaderFields = httpHeaders
+        
+        return request
+    }
+    
+    private func makeURLRequest(with url: URL?, httpMethod: HTTPMethod, httpHeaders: HTTPHeaders) throws -> URLRequest {
+        guard let url = url else {
+            throw NetworkError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        
+        request.httpMethod = "\(httpMethod)"
+        do {
+            try request.addBody(with: httpMethod)
+        } catch {
+            throw NetworkError.invalidBody
+        }
+        
+        request.allHTTPHeaderFields = httpHeaders
+        
+        return request
+    }
+    
+    private func processingNetworkResponse(with request: URLRequest) -> AnyPublisher<Data, NetworkError> {
         return session.dataTaskPublisher(for: request)
             .tryMap { data, response in
                 guard let httpResponse = response as? HTTPURLResponse else {
@@ -63,24 +121,5 @@ public struct NetworkManager: NetworkManageable {
                 }
             }
             .eraseToAnyPublisher()
-    }
-    
-    private func makeURLRequest(with urlString: String, httpMethod: HTTPMethod, httpHeaders: HTTPHeaders) throws -> URLRequest {
-        guard let url = URL(string: urlString) else {
-            throw NetworkError.invalidURL
-        }
-        
-        var request = URLRequest(url: url)
-        
-        request.httpMethod = "\(httpMethod)"
-        do {
-            try request.addBody(with: httpMethod)
-        } catch {
-            throw NetworkError.invalidBody
-        }
-        
-        request.allHTTPHeaderFields = httpHeaders
-        
-        return request
     }
 }
